@@ -65,11 +65,25 @@ const handleOPTIONS = async () => {
 }
 
 // 从环境变量获取配置，如果没有设置则使用默认值
-const BASE_URL = process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com"
-const API_VERSION = process.env.GEMINI_API_VERSION || "v1beta"
+// 支持多种环境：Netlify Edge Functions, Cloudflare Workers, Node.js
+const getEnvVar = (key, defaultValue) => {
+    // Netlify Edge Functions
+    if (typeof Netlify !== 'undefined' && Netlify.env) {
+        return Netlify.env.get(key) || defaultValue
+    }
+    // Cloudflare Workers
+    if (typeof globalThis !== 'undefined' && globalThis.GEMINI_BASE_URL) {
+        return globalThis[key] || defaultValue
+    }
+    // Node.js 或其他环境
+    return process.env[key] || defaultValue
+}
+
+const BASE_URL = getEnvVar("GEMINI_BASE_URL", "https://generativelanguage.googleapis.com")
+const API_VERSION = getEnvVar("GEMINI_API_VERSION", "v1beta")
 
 // https://github.com/google-gemini/generative-ai-js/blob/cf223ff4a1ee5a2d944c53cddb8976136382bee6/src/requests/request.ts#L71
-const API_CLIENT = process.env.GEMINI_API_CLIENT || "genai-js/0.21.0" // npm view @google/generative-ai version
+const API_CLIENT = getEnvVar("GEMINI_API_CLIENT", "genai-js/0.21.0") // npm view @google/generative-ai version
 const makeHeaders = (apiKey, more) => ({
     "x-goog-api-client": API_CLIENT,
     ...(apiKey && { "x-goog-api-key": apiKey }),
@@ -96,7 +110,7 @@ async function handleModels(apiKey) {
     return new Response(body, fixCors(response))
 }
 
-const DEFAULT_EMBEDDINGS_MODEL = process.env.GEMINI_DEFAULT_EMBEDDINGS_MODEL || "gemini-embedding-001"
+const DEFAULT_EMBEDDINGS_MODEL = getEnvVar("GEMINI_DEFAULT_EMBEDDINGS_MODEL", "gemini-embedding-001")
 async function handleEmbeddings(req, apiKey) {
     let modelFull, model
     switch (true) {
@@ -143,7 +157,7 @@ async function handleEmbeddings(req, apiKey) {
     return new Response(body, fixCors(response))
 }
 
-const DEFAULT_MODEL = process.env.GEMINI_DEFAULT_MODEL || "gemini-2.5-flash"
+const DEFAULT_MODEL = getEnvVar("GEMINI_DEFAULT_MODEL", "gemini-2.5-flash")
 async function handleCompletions(req, apiKey) {
     let model
     switch (true) {
