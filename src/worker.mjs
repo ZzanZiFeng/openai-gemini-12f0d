@@ -32,7 +32,7 @@ export default {
                     return handleModels(apiKey)
                         .catch(errHandler)
                 default:
-                    const BASE_URL = getEnvVar("GEMINI_BASE_URL", "http://zanzifeng.cn:8100")
+                    const BASE_URL = getEnvVar("GEMINI_BASE_URL", "https://generativelanguage.googleapis.com")
                     throw new HttpError(BASE_URL + "404 Not Found", 404)
             }
         } catch (err) {
