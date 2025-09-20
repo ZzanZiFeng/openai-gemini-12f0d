@@ -32,7 +32,8 @@ export default {
                     return handleModels(apiKey)
                         .catch(errHandler)
                 default:
-                    throw new HttpError("404 Not Found", 404)
+                    const BASE_URL = getEnvVar("GEMINI_BASE_URL", "http://zanzifeng.cn:8100")
+                    throw new HttpError(BASE_URL + "404 Not Found", 404)
             }
         } catch (err) {
             return errHandler(err)
